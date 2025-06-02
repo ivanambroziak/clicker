@@ -1,5 +1,3 @@
-# Створіть файл: myproject/clicker/migrations/0002_chatmessage.py
-
 from django.db import migrations, models
 
 class Migration(migrations.Migration):

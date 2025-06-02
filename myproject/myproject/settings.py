@@ -28,13 +28,13 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'channels',
+    # Видаляємо 'channels' оскільки не використовуємо WebSocket
     'clicker',
 ]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
-    'whitenoise.middleware.WhiteNoiseMiddleware',  # Для статичних файлів
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -62,17 +62,9 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'myproject.wsgi.application'
-ASGI_APPLICATION = 'myproject.asgi.application'
+# Видаляємо ASGI_APPLICATION оскільки не використовуємо Channels
 
-# Налаштування для Redis (для production використовуємо змінну середовища)
-CHANNEL_LAYERS = {
-    'default': {
-        'BACKEND': 'channels_redis.core.RedisChannelLayer',
-        'CONFIG': {
-            "hosts": [os.environ.get('REDIS_URL', 'redis://localhost:6379')],
-        },
-    },
-}
+# Видаляємо CHANNEL_LAYERS оскільки не використовуємо Channels
 
 # Налаштування бази даних
 DATABASES = {
@@ -123,7 +115,6 @@ if not DEBUG:
     SECURE_SSL_REDIRECT = True
     SESSION_COOKIE_SECURE = True
     CSRF_COOKIE_SECURE = True
-    USE_TZ = True
 
 # Monobank settings
 MONOBANK_JAR_URL = 'https://send.monobank.ua/jar/3oEs1mcoBd'
