@@ -26,3 +26,16 @@ class Comment(models.Model):
 
     def __str__(self):
         return f"{self.name}: {self.text[:50]}"
+
+class ChatMessage(models.Model):
+    username = models.CharField(max_length=100, verbose_name="Ім'я користувача")
+    message = models.TextField(verbose_name="Повідомлення")
+    timestamp = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = "Повідомлення чату"
+        verbose_name_plural = "Повідомлення чату"
+        ordering = ['timestamp']
+
+    def __str__(self):
+        return f"{self.username}: {self.message[:50]}"

@@ -2,17 +2,21 @@ from django.shortcuts import render, redirect
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
-from .models import ClickerImage, Comment
+from django.conf import settings
+from .models import ClickerImage, Comment, ChatMessage
 import json
 
 
 def home(request):
     active_image = ClickerImage.objects.filter(is_active=True).first()
     comments = Comment.objects.all()[:10]  # Останні 10 коментарів
+    recent_messages = ChatMessage.objects.all()[:20]  # Останні 20 повідомлень чату
 
     context = {
         'image': active_image,
         'comments': comments,
+        'recent_messages': recent_messages,
+        'monobank_url': settings.MONOBANK_JAR_URL,
     }
     return render(request, 'clicker/home.html', context)
 

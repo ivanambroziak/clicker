@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import ClickerImage, Comment
+from .models import ClickerImage, Comment, ChatMessage
 
 @admin.register(ClickerImage)
 class ClickerImageAdmin(admin.ModelAdmin):
@@ -12,3 +12,10 @@ class CommentAdmin(admin.ModelAdmin):
     list_display = ('name', 'text', 'created_at')
     list_filter = ('created_at',)
     readonly_fields = ('created_at',)
+
+@admin.register(ChatMessage)
+class ChatMessageAdmin(admin.ModelAdmin):
+    list_display = ('username', 'message', 'timestamp')
+    list_filter = ('timestamp',)
+    readonly_fields = ('timestamp',)
+    list_per_page = 50
