@@ -1,36 +1,20 @@
-FROM python:3.13-slim
+# Вихідний образ
+FROM python:3.11
 
-# Встановлення системних залежностей
-RUN apt-get update && apt-get install -y \
-    gcc \
-    && rm -rf /var/lib/apt/lists/*
-
-# Робоча директорія
+# Робоча директорія в контейнері
 WORKDIR /app
 
-# Копіювання requirements
+# Копіюємо залежності
 COPY requirements.txt .
 
-# Встановлення Python залежностей
+# Встановлюємо залежності
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Копіювання коду додатку
+# Копіюємо весь проєкт
 COPY . .
 
-# Створення директорій для медіа та статичних файлів
-RUN mkdir -p media staticfiles
-
-# Створення суперкористувача (опціонально)
-ENV DJANGO_SUPERUSER_USERNAME=admin
-ENV DJANGO_SUPERUSER_EMAIL=admin@example.com
-ENV DJANGO_SUPERUSER_PASSWORD=admin123
-
-# Виконання міграцій і збирання статичних файлів
-RUN python manage.py migrate
-RUN python manage.py collectstatic --noinput
-
-# Відкриття порту
+# Відкриваємо порт
 EXPOSE 8000
 
-# Команда для запуску
+# Запуск сервера за замовчуванням
 CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]
