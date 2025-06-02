@@ -14,7 +14,7 @@ def home(request):
         'image': active_image,
         'comments': comments,
     }
-    return render(request, 'clicker_app/home.html', context)
+    return render(request, 'clicker/home.html', context)
 
 
 @require_POST
