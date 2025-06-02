@@ -5,9 +5,21 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = 'django-insecure-your-secret-key-here-change-in-production'
 
-DEBUG = True
+# Визначаємо чи це production середовище
+DEBUG = os.environ.get('DEBUG', 'False').lower() == 'true'
 
 ALLOWED_HOSTS = ['*']
+
+# Додаємо налаштування для CSRF
+CSRF_TRUSTED_ORIGINS = [
+    'https://torpedalvivskogo.onrender.com',
+    'http://localhost:8000',
+    'http://127.0.0.1:8000',
+]
+
+# Якщо є змінна середовища з URL сайту, додаємо її
+if os.environ.get('SITE_URL'):
+    CSRF_TRUSTED_ORIGINS.append(os.environ.get('SITE_URL'))
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -22,6 +34,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',  # Для статичних файлів
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -51,7 +64,7 @@ TEMPLATES = [
 WSGI_APPLICATION = 'myproject.wsgi.application'
 ASGI_APPLICATION = 'myproject.asgi.application'
 
-# Channels
+# Налаштування для Redis (для production використовуємо змінну середовища)
 CHANNEL_LAYERS = {
     'default': {
         'BACKEND': 'channels_redis.core.RedisChannelLayer',
@@ -61,6 +74,7 @@ CHANNEL_LAYERS = {
     },
 }
 
+# Налаштування бази даних
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
@@ -89,13 +103,30 @@ TIME_ZONE = 'Europe/Kiev'
 USE_I18N = True
 USE_TZ = True
 
+# Статичні файли
 STATIC_URL = '/static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 
+# Медіа файли
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
+# Налаштування безпеки для production
+if not DEBUG:
+    SECURE_BROWSER_XSS_FILTER = True
+    SECURE_CONTENT_TYPE_NOSNIFF = True
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+    SECURE_HSTS_SECONDS = 31536000
+    SECURE_REDIRECT_EXEMPT = []
+    SECURE_SSL_REDIRECT = True
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
+    USE_TZ = True
+
 # Monobank settings
 MONOBANK_JAR_URL = 'https://send.monobank.ua/jar/3oEs1mcoBd'
+
+# Налаштування для статичних файлів (WhiteNoise)
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
