@@ -1,17 +1,3 @@
-import os
-from django.core.wsgi import get_wsgi_application
-
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'clicker_project.settings')
-application = get_wsgi_application()
-
-# clicker_project/asgi.py
-import os
-from django.core.asgi import get_asgi_application
-
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'clicker_project.settings')
-application = get_asgi_application()
-
-# clicker_app/templates/clicker_app/home.html
 <!DOCTYPE html>
 <html lang="uk">
 <head>
@@ -33,7 +19,7 @@ application = get_asgi_application()
         }
 
         .container {
-            max-width: 800px;
+            max-width: 1200px;
             margin: 0 auto;
             padding: 20px;
         }
@@ -55,11 +41,23 @@ application = get_asgi_application()
             color: rgba(255,255,255,0.8);
         }
 
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 400px;
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+
+        .left-section {
+            display: flex;
+            flex-direction: column;
+            gap: 30px;
+        }
+
         .clicker-section {
             background: white;
             border-radius: 20px;
             padding: 40px;
-            margin-bottom: 40px;
             box-shadow: 0 10px 30px rgba(0,0,0,0.2);
             text-align: center;
         }
@@ -109,11 +107,147 @@ application = get_asgi_application()
             margin-top: 20px;
         }
 
+        .donation-section {
+            background: linear-gradient(45deg, #000000, #333333);
+            border-radius: 20px;
+            padding: 30px;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        .donation-title {
+            color: white;
+            font-size: 1.5rem;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .monobank-button {
+            background: white;
+            color: #000;
+            border: none;
+            padding: 15px 30px;
+            font-size: 1.1rem;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .monobank-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255,255,255,0.3);
+        }
+
+        .chat-section {
+            background: white;
+            border-radius: 20px;
+            padding: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            display: flex;
+            flex-direction: column;
+            height: 600px;
+        }
+
+        .chat-header {
+            font-size: 1.5rem;
+            color: #333;
+            margin-bottom: 15px;
+            text-align: center;
+            padding: 10px;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            border-radius: 15px;
+        }
+
+        .chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            border: 2px solid #f0f0f0;
+            border-radius: 15px;
+            padding: 15px;
+            margin-bottom: 15px;
+            background: #fafafa;
+        }
+
+        .message {
+            background: white;
+            border-radius: 10px;
+            padding: 12px;
+            margin-bottom: 10px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            border-left: 4px solid #667eea;
+        }
+
+        .message-author {
+            font-weight: bold;
+            color: #667eea;
+            font-size: 0.9rem;
+        }
+
+        .message-text {
+            color: #333;
+            margin: 5px 0;
+        }
+
+        .message-time {
+            font-size: 0.8rem;
+            color: #888;
+        }
+
+        .chat-input-section {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .username-input, .message-input {
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 1rem;
+            transition: border-color 0.3s ease;
+        }
+
+        .username-input:focus, .message-input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .send-button {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .send-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .send-button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
         .comments-section {
             background: white;
             border-radius: 20px;
             padding: 30px;
             box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            grid-column: 1 / -1;
         }
 
         .section-title {
@@ -179,13 +313,15 @@ application = get_asgi_application()
         .comments-list {
             max-height: 400px;
             overflow-y: auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 15px;
         }
 
         .comment {
             background: #f8f9fa;
             border-radius: 10px;
             padding: 15px;
-            margin-bottom: 15px;
             border-left: 4px solid #667eea;
         }
 
@@ -212,18 +348,52 @@ application = get_asgi_application()
             padding: 40px;
         }
 
+        .connection-status {
+            padding: 8px 15px;
+            border-radius: 5px;
+            font-size: 0.9rem;
+            text-align: center;
+            margin-bottom: 10px;
+        }
+
+        .connected {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .disconnected {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        @media (max-width: 1024px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+
+            .chat-section {
+                height: 400px;
+            }
+        }
+
         @media (max-width: 768px) {
             .title {
                 font-size: 2rem;
             }
 
-            .clicker-section, .comments-section {
+            .clicker-section, .comments-section, .donation-section {
                 padding: 20px;
             }
 
             .click-button {
                 padding: 15px 30px;
                 font-size: 1.2rem;
+            }
+
+            .comments-list {
+                grid-template-columns: 1fr;
             }
         }
     </style>
@@ -232,23 +402,67 @@ application = get_asgi_application()
     <div class="container">
         <div class="header">
             <h1 class="title">🍺 Клікер Бухати</h1>
-            <p class="subtitle">Натискай кнопку і збільшуй лічильник!</p>
+            <p class="subtitle">Натискай кнопку, спілкуйся в чаті і підтримуй проект!</p>
         </div>
 
-        <div class="clicker-section">
-            {% if image %}
-                <img src="{{ image.image.url }}" alt="{{ image.title }}" class="clicker-image">
-                <br>
-                <button class="click-button" onclick="clickButton()">🍺 БУХАТИ</button>
-                <div class="counter">
-                    Всього кліків: <span id="click-count">{{ image.click_count }}</span>
+        <div class="main-content">
+            <div class="left-section">
+                <div class="clicker-section">
+                    {% if image %}
+                        <img src="{{ image.image.url }}" alt="{{ image.title }}" class="clicker-image">
+                        <br>
+                        <button class="click-button" onclick="clickButton()">🍺 БУХАТИ</button>
+                        <div class="counter">
+                            Всього кліків: <span id="click-count">{{ image.click_count }}</span>
+                        </div>
+                    {% else %}
+                        <div class="no-image">
+                            <h3>Зображення не завантажено</h3>
+                            <p>Адміністратор має додати зображення через адмін-панель</p>
+                        </div>
+                    {% endif %}
                 </div>
-            {% else %}
-                <div class="no-image">
-                    <h3>Зображення не завантажено</h3>
-                    <p>Адміністратор має додати зображення через адмін-панель</p>
+
+                <div class="donation-section">
+                    <div class="donation-title">
+                        🏦 <span>Підтримати проект</span>
+                    </div>
+                    <p style="color: rgba(255,255,255,0.8); margin-bottom: 20px;">
+                        Допоможіть розвитку клікера!
+                    </p>
+                    <a href="{{ monobank_url }}" target="_blank" class="monobank-button">
+                        💳 Monobank Банка
+                    </a>
                 </div>
-            {% endif %}
+            </div>
+
+            <div class="chat-section">
+                <div class="chat-header">💬 Живий чат</div>
+
+                <div id="connection-status" class="connection-status disconnected">
+                    Підключення до чату...
+                </div>
+
+                <div id="chat-messages" class="chat-messages">
+                    {% for message in recent_messages %}
+                        <div class="message">
+                            <div class="message-author">{{ message.username }}</div>
+                            <div class="message-text">{{ message.message }}</div>
+                            <div class="message-time">{{ message.timestamp|date:"H:i" }}</div>
+                        </div>
+                    {% empty %}
+                        <div class="message">
+                            <div class="message-text">Поки що повідомлень немає. Будьте першим!</div>
+                        </div>
+                    {% endfor %}
+                </div>
+
+                <div class="chat-input-section">
+                    <input type="text" id="username-input" class="username-input" placeholder="Ваше ім'я" maxlength="50">
+                    <input type="text" id="message-input" class="message-input" placeholder="Введіть повідомлення..." maxlength="500">
+                    <button id="send-button" class="send-button" onclick="sendMessage()" disabled>Відправити</button>
+                </div>
+            </div>
         </div>
 
         <div class="comments-section">
@@ -284,6 +498,7 @@ application = get_asgi_application()
     </div>
 
     <script>
+        // Clicker functionality
         function clickButton() {
             fetch('/click/', {
                 method: 'POST',
@@ -308,6 +523,142 @@ application = get_asgi_application()
                 console.error('Error:', error);
             });
         }
+
+        // Chat functionality
+        let chatSocket = null;
+        let isConnected = false;
+
+        function initializeChat() {
+            const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+            chatSocket = new WebSocket(protocol + '//' + window.location.host + '/ws/chat/');
+
+            chatSocket.onopen = function(e) {
+                console.log('Chat socket connected');
+                isConnected = true;
+                updateConnectionStatus(true);
+                enableChatInput();
+            };
+
+            chatSocket.onmessage = function(e) {
+                const data = JSON.parse(e.data);
+                addMessageToChat(data.username, data.message, data.timestamp);
+            };
+
+            chatSocket.onclose = function(e) {
+                console.log('Chat socket closed');
+                isConnected = false;
+                updateConnectionStatus(false);
+                disableChatInput();
+
+                // Reconnect after 3 seconds
+                setTimeout(initializeChat, 3000);
+            };
+
+            chatSocket.onerror = function(e) {
+                console.error('Chat socket error:', e);
+                updateConnectionStatus(false);
+            };
+        }
+
+        function updateConnectionStatus(connected) {
+            const statusElement = document.getElementById('connection-status');
+            if (connected) {
+                statusElement.textContent = 'Підключено до чату ✅';
+                statusElement.className = 'connection-status connected';
+            } else {
+                statusElement.textContent = 'Відключено від чату ❌';
+                statusElement.className = 'connection-status disconnected';
+            }
+        }
+
+        function enableChatInput() {
+            const sendButton = document.getElementById('send-button');
+            const usernameInput = document.getElementById('username-input');
+            const messageInput = document.getElementById('message-input');
+
+            sendButton.disabled = false;
+            usernameInput.disabled = false;
+            messageInput.disabled = false;
+        }
+
+        function disableChatInput() {
+            const sendButton = document.getElementById('send-button');
+            const usernameInput = document.getElementById('username-input');
+            const messageInput = document.getElementById('message-input');
+
+            sendButton.disabled = true;
+            usernameInput.disabled = true;
+            messageInput.disabled = true;
+        }
+
+        function sendMessage() {
+            const usernameInput = document.getElementById('username-input');
+            const messageInput = document.getElementById('message-input');
+            const username = usernameInput.value.trim();
+            const message = messageInput.value.trim();
+
+            if (!username || !message) {
+                alert('Будь ласка, введіть ім\'я та повідомлення');
+                return;
+            }
+
+            if (!isConnected) {
+                alert('Чат не підключений. Спробуйте пізніше.');
+                return;
+            }
+
+            chatSocket.send(JSON.stringify({
+                'username': username,
+                'message': message
+            }));
+
+            messageInput.value = '';
+        }
+
+        function addMessageToChat(username, message, timestamp) {
+            const chatMessages = document.getElementById('chat-messages');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = 'message';
+
+            messageDiv.innerHTML = `
+                <div class="message-author">${escapeHtml(username)}</div>
+                <div class="message-text">${escapeHtml(message)}</div>
+                <div class="message-time">${timestamp}</div>
+            `;
+
+            chatMessages.appendChild(messageDiv);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+
+            // Remove old messages if there are too many
+            while (chatMessages.children.length > 50) {
+                chatMessages.removeChild(chatMessages.firstChild);
+            }
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // Handle Enter key for sending messages
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') {
+                const usernameInput = document.getElementById('username-input');
+                const messageInput = document.getElementById('message-input');
+
+                if (document.activeElement === usernameInput) {
+                    messageInput.focus();
+                } else if (document.activeElement === messageInput) {
+                    sendMessage();
+                }
+            }
+        });
+
+        // Initialize chat when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeChat();
+        });
     </script>
 </body>
 </html>
