@@ -130,3 +130,6 @@ MONOBANK_JAR_URL = 'https://send.monobank.ua/jar/3oEs1mcoBd'
 
 # Налаштування для статичних файлів (WhiteNoise)
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+
+# Налаштування URL
+APPEND_SLASH = True

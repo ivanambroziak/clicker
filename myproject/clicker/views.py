@@ -1,7 +1,7 @@
 from django.shortcuts import render, redirect
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
-from django.views.decorators.http import require_POST
+from django.views.decorators.http import require_POST, require_http_methods
 from django.conf import settings
 from .models import ClickerImage, Comment
 import json
@@ -30,12 +30,21 @@ def click_button(request):
     return JsonResponse({'error': 'No active image'}, status=400)
 
 
-@require_POST
+@require_http_methods(["POST"])
 def add_comment(request):
-    name = request.POST.get('name', '').strip()
-    text = request.POST.get('text', '').strip()
+    """
+    Обробляє додавання коментарів
+    """
+    if request.method == 'POST':
+        name = request.POST.get('name', '').strip()
+        text = request.POST.get('text', '').strip()
 
-    if name and text:
-        Comment.objects.create(name=name, text=text)
+        if name and text:
+            Comment.objects.create(name=name, text=text)
+            return redirect('home')
+        else:
+            # Якщо дані не валідні, повертаємося на головну з повідомленням
+            return redirect('home')
 
+    # Якщо це не POST запит, перенаправляємо на головну
     return redirect('home')
