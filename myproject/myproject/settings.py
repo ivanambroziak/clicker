@@ -56,7 +56,7 @@ CHANNEL_LAYERS = {
     'default': {
         'BACKEND': 'channels_redis.core.RedisChannelLayer',
         'CONFIG': {
-            "hosts": [('127.0.0.1', 6379)],
+            "hosts": [os.environ.get('REDIS_URL', 'redis://localhost:6379')],
         },
     },
 }
@@ -98,4 +98,4 @@ MEDIA_ROOT = BASE_DIR / 'media'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # Monobank settings
-MONOBANK_JAR_URL = 'https://send.monobank.ua/jar/your-jar-id'  # Замініть на ваш реальний URL банки
+MONOBANK_JAR_URL = 'https://send.monobank.ua/jar/3oEs1mcoBd'
