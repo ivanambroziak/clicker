@@ -524,141 +524,183 @@
             });
         }
 
-        // Chat functionality
         let chatSocket = null;
-        let isConnected = false;
+let isConnected = false;
+let reconnectAttempts = 0;
+const maxReconnectAttempts = 5;
 
-        function initializeChat() {
-            const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-            chatSocket = new WebSocket(protocol + '//' + window.location.host + '/ws/chat/');
+function initializeChat() {
+    if (chatSocket && chatSocket.readyState === WebSocket.OPEN) {
+        return; // Уже підключено
+    }
 
-            chatSocket.onopen = function(e) {
-                console.log('Chat socket connected');
-                isConnected = true;
-                updateConnectionStatus(true);
-                enableChatInput();
-            };
+    const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+    const wsUrl = protocol + '//' + window.location.host + '/ws/chat/';
 
-            chatSocket.onmessage = function(e) {
-                const data = JSON.parse(e.data);
-                addMessageToChat(data.username, data.message, data.timestamp);
-            };
+    console.log('Connecting to:', wsUrl);
+    chatSocket = new WebSocket(wsUrl);
 
-            chatSocket.onclose = function(e) {
-                console.log('Chat socket closed');
-                isConnected = false;
-                updateConnectionStatus(false);
-                disableChatInput();
+    chatSocket.onopen = function(e) {
+        console.log('Chat socket connected');
+        isConnected = true;
+        reconnectAttempts = 0;
+        updateConnectionStatus(true);
+        enableChatInput();
+    };
 
-                // Reconnect after 3 seconds
-                setTimeout(initializeChat, 3000);
-            };
-
-            chatSocket.onerror = function(e) {
-                console.error('Chat socket error:', e);
-                updateConnectionStatus(false);
-            };
-        }
-
-        function updateConnectionStatus(connected) {
-            const statusElement = document.getElementById('connection-status');
-            if (connected) {
-                statusElement.textContent = 'Підключено до чату ✅';
-                statusElement.className = 'connection-status connected';
+    chatSocket.onmessage = function(e) {
+        try {
+            const data = JSON.parse(e.data);
+            if (data.error) {
+                console.error('Chat error:', data.error);
+                alert('Помилка чату: ' + data.error);
             } else {
-                statusElement.textContent = 'Відключено від чату ❌';
-                statusElement.className = 'connection-status disconnected';
+                addMessageToChat(data.username, data.message, data.timestamp);
             }
+        } catch (error) {
+            console.error('Error parsing message:', error);
         }
+    };
 
-        function enableChatInput() {
-            const sendButton = document.getElementById('send-button');
-            const usernameInput = document.getElementById('username-input');
-            const messageInput = document.getElementById('message-input');
+    chatSocket.onclose = function(e) {
+        console.log('Chat socket closed:', e.code, e.reason);
+        isConnected = false;
+        updateConnectionStatus(false);
+        disableChatInput();
 
-            sendButton.disabled = false;
-            usernameInput.disabled = false;
-            messageInput.disabled = false;
+        // Reconnect with exponential backoff
+        if (reconnectAttempts < maxReconnectAttempts) {
+            const delay = Math.pow(2, reconnectAttempts) * 1000; // 1s, 2s, 4s, 8s, 16s
+            console.log(`Reconnecting in ${delay}ms (attempt ${reconnectAttempts + 1})`);
+            setTimeout(() => {
+                reconnectAttempts++;
+                initializeChat();
+            }, delay);
+        } else {
+            console.log('Max reconnect attempts reached');
+            updateConnectionStatus(false, 'Перевищено максимальну кількість спроб підключення');
         }
+    };
 
-        function disableChatInput() {
-            const sendButton = document.getElementById('send-button');
-            const usernameInput = document.getElementById('username-input');
-            const messageInput = document.getElementById('message-input');
+    chatSocket.onerror = function(e) {
+        console.error('Chat socket error:', e);
+        updateConnectionStatus(false, 'Помилка WebSocket підключення');
+    };
+}
 
-            sendButton.disabled = true;
-            usernameInput.disabled = true;
-            messageInput.disabled = true;
+function updateConnectionStatus(connected, customMessage = '') {
+    const statusElement = document.getElementById('connection-status');
+    if (connected) {
+        statusElement.textContent = 'Підключено до чату ✅';
+        statusElement.className = 'connection-status connected';
+    } else {
+        const message = customMessage || 'Відключено від чату ❌';
+        statusElement.textContent = message;
+        statusElement.className = 'connection-status disconnected';
+    }
+}
+
+function enableChatInput() {
+    const sendButton = document.getElementById('send-button');
+    const usernameInput = document.getElementById('username-input');
+    const messageInput = document.getElementById('message-input');
+
+    sendButton.disabled = false;
+    usernameInput.disabled = false;
+    messageInput.disabled = false;
+}
+
+function disableChatInput() {
+    const sendButton = document.getElementById('send-button');
+    const usernameInput = document.getElementById('username-input');
+    const messageInput = document.getElementById('message-input');
+
+    sendButton.disabled = true;
+    usernameInput.disabled = true;
+    messageInput.disabled = true;
+}
+
+function sendMessage() {
+    const usernameInput = document.getElementById('username-input');
+    const messageInput = document.getElementById('message-input');
+    const username = usernameInput.value.trim();
+    const message = messageInput.value.trim();
+
+    if (!username || !message) {
+        alert('Будь ласка, введіть ім\'я та повідомлення');
+        return;
+    }
+
+    if (!isConnected || !chatSocket || chatSocket.readyState !== WebSocket.OPEN) {
+        alert('Чат не підключений. Спробуйте пізніше.');
+        return;
+    }
+
+    try {
+        chatSocket.send(JSON.stringify({
+            'username': username,
+            'message': message
+        }));
+        messageInput.value = '';
+    } catch (error) {
+        console.error('Error sending message:', error);
+        alert('Помилка відправки повідомлення');
+    }
+}
+
+function addMessageToChat(username, message, timestamp) {
+    const chatMessages = document.getElementById('chat-messages');
+    const messageDiv = document.createElement('div');
+    messageDiv.className = 'message';
+
+    messageDiv.innerHTML = `
+        <div class="message-author">${escapeHtml(username)}</div>
+        <div class="message-text">${escapeHtml(message)}</div>
+        <div class="message-time">${timestamp}</div>
+    `;
+
+    chatMessages.appendChild(messageDiv);
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+
+    // Remove old messages if there are too many
+    while (chatMessages.children.length > 50) {
+        chatMessages.removeChild(chatMessages.firstChild);
+    }
+}
+
+function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+
+// Handle Enter key for sending messages
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') {
+        const usernameInput = document.getElementById('username-input');
+        const messageInput = document.getElementById('message-input');
+
+        if (document.activeElement === usernameInput) {
+            messageInput.focus();
+        } else if (document.activeElement === messageInput) {
+            sendMessage();
         }
+    }
+});
 
-        function sendMessage() {
-            const usernameInput = document.getElementById('username-input');
-            const messageInput = document.getElementById('message-input');
-            const username = usernameInput.value.trim();
-            const message = messageInput.value.trim();
+// Initialize chat when page loads
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('Initializing chat...');
+    initializeChat();
+});
 
-            if (!username || !message) {
-                alert('Будь ласка, введіть ім\'я та повідомлення');
-                return;
-            }
-
-            if (!isConnected) {
-                alert('Чат не підключений. Спробуйте пізніше.');
-                return;
-            }
-
-            chatSocket.send(JSON.stringify({
-                'username': username,
-                'message': message
-            }));
-
-            messageInput.value = '';
-        }
-
-        function addMessageToChat(username, message, timestamp) {
-            const chatMessages = document.getElementById('chat-messages');
-            const messageDiv = document.createElement('div');
-            messageDiv.className = 'message';
-
-            messageDiv.innerHTML = `
-                <div class="message-author">${escapeHtml(username)}</div>
-                <div class="message-text">${escapeHtml(message)}</div>
-                <div class="message-time">${timestamp}</div>
-            `;
-
-            chatMessages.appendChild(messageDiv);
-            chatMessages.scrollTop = chatMessages.scrollHeight;
-
-            // Remove old messages if there are too many
-            while (chatMessages.children.length > 50) {
-                chatMessages.removeChild(chatMessages.firstChild);
-            }
-        }
-
-        function escapeHtml(text) {
-            const div = document.createElement('div');
-            div.textContent = text;
-            return div.innerHTML;
-        }
-
-        // Handle Enter key for sending messages
-        document.addEventListener('keydown', function(e) {
-            if (e.key === 'Enter') {
-                const usernameInput = document.getElementById('username-input');
-                const messageInput = document.getElementById('message-input');
-
-                if (document.activeElement === usernameInput) {
-                    messageInput.focus();
-                } else if (document.activeElement === messageInput) {
-                    sendMessage();
-                }
-            }
-        });
-
-        // Initialize chat when page loads
-        document.addEventListener('DOMContentLoaded', function() {
-            initializeChat();
-        });
+// Reconnect when window gains focus
+window.addEventListener('focus', function() {
+    if (!isConnected) {
+        console.log('Window focused, attempting to reconnect...');
+        initializeChat();
+    }
+});
     </script>
 </body>
 </html>
